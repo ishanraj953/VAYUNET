@@ -1,7 +1,8 @@
 # FastAPI Backend & Core Services
 fastapi>=0.110.0
 uvicorn[standard]>=0.28.0
-pydantic>=2.6.0
+pydantic[email]>=2.6.0
+email-validator>=2.0.0
 motor>=3.3.0
 python-jose[cryptography]>=3.3.0
 requests>=2.31.0
