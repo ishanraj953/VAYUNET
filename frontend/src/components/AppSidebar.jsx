@@ -13,6 +13,7 @@ import {
   Gauge, 
   Sparkles, 
   AlertTriangle, 
+  Radio,
   CheckCircle2, 
   Target, 
   FileText,
@@ -60,7 +61,8 @@ export default function AppSidebar() {
     {
       title: "GOVERNANCE & ALERTS",
       items: [
-        { name: "Early Warning Grid", path: "/app/early-warning", icon: AlertTriangle, badge: "Live" },
+        { name: "Live Alert Command", path: "/app/live-early-warning", icon: Radio, badge: "LIVE" },
+        { name: "Early Warning Grid", path: "/app/early-warning", icon: AlertTriangle },
         { name: "Data Quality & Audit", path: "/app/data-quality", icon: CheckCircle2 },
         { name: "NCAP Policy Tracker", path: "/app/ncap-tracker", icon: Target },
         { name: "Executive Briefing", path: "/app/executive-briefing", icon: FileText },

@@ -30,10 +30,10 @@ export default function AlertBanner({
 
         {/* Action Button */}
         <Link
-          to="/app/early-warning"
+          to="/app/live-early-warning"
           className="flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
         >
-          <span>View Emergency Protocols</span>
+          <span>View Live Emergency Command</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>

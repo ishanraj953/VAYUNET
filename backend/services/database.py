@@ -7,8 +7,8 @@ from datetime import datetime
 logger = logging.getLogger("vayunet.db")
 
 # MongoDB connection settings
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = os.getenv("DB_NAME", "vayunet_db")
+MONGO_URI = os.getenv("MONGODB_URI") or os.getenv("MONGO_URI", "mongodb://localhost:27017")
+DB_NAME = os.getenv("DATABASE_NAME") or os.getenv("DB_NAME", "vayunet")
 
 client = None
 db = None
@@ -17,6 +17,58 @@ is_mongo_connected = False
 # Resilient fallback store for local development without running MongoDB daemon
 FALLBACK_USERS_FILE = os.path.join(os.path.dirname(__file__), "..", "data_store_users.json")
 _fallback_users: Dict[str, Dict[str, Any]] = {}
+
+def _seed_initial_users():
+    global _fallback_users
+    # Seed default accounts if empty
+    from backend.services.auth_service import hash_password
+    seed_accounts = [
+        {
+            "name": "Dr. Ishan Raj (Admin Director)",
+            "email": "admin@vayunet.in",
+            "password_hash": hash_password("admin123"),
+            "provider": "local",
+            "role": "admin",
+            "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Ishan%20Raj",
+            "created_at": datetime.utcnow().isoformat(),
+            "last_login": datetime.utcnow().isoformat()
+        },
+        {
+            "name": "Chief Environmental Analyst",
+            "email": "analyst@vayunet.in",
+            "password_hash": hash_password("analyst123"),
+            "provider": "local",
+            "role": "analyst",
+            "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Environmental%20Analyst",
+            "created_at": datetime.utcnow().isoformat(),
+            "last_login": datetime.utcnow().isoformat()
+        },
+        {
+            "name": "State Pollution Control Officer",
+            "email": "analyst@vayunet.gov.in",
+            "password_hash": hash_password("analyst123"),
+            "provider": "local",
+            "role": "analyst",
+            "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=State%20Officer",
+            "created_at": datetime.utcnow().isoformat(),
+            "last_login": datetime.utcnow().isoformat()
+        },
+        {
+            "name": "Guest Policy Researcher",
+            "email": "demo@vayunet.in",
+            "password_hash": hash_password("demo123"),
+            "provider": "local",
+            "role": "user",
+            "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Guest%20Researcher",
+            "created_at": datetime.utcnow().isoformat(),
+            "last_login": datetime.utcnow().isoformat()
+        }
+    ]
+    for acc in seed_accounts:
+        if acc["email"] not in _fallback_users:
+            acc["_id"] = f"usr_seed_{acc['role']}"
+            _fallback_users[acc["email"]] = acc
+    _save_fallback_users()
 
 def _load_fallback_users():
     global _fallback_users
@@ -27,6 +79,7 @@ def _load_fallback_users():
         except Exception as e:
             logger.warning(f"Could not load fallback users: {e}")
             _fallback_users = {}
+    _seed_initial_users()
 
 def _save_fallback_users():
     try:
@@ -41,15 +94,25 @@ async def connect_db():
     global client, db, is_mongo_connected
     try:
         from motor.motor_asyncio import AsyncIOMotorClient
-        client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=2000)
+        client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
         # Verify connection
-        await client.server_info()
+        info = await client.server_info()
         db = client[DB_NAME]
         is_mongo_connected = True
-        logger.info(f"Connected to MongoDB at {MONGO_URI} (DB: {DB_NAME})")
+        logger.info(f"Connected to MongoDB Atlas cluster at {DB_NAME} (Server version: {info.get('version')})")
+        
+        # Ensure collections exist and seed initial users in MongoDB Atlas if empty
+        user_count = await db.users.count_documents({})
+        if user_count == 0:
+            for email, u in _fallback_users.items():
+                u_copy = dict(u)
+                if "_id" in u_copy and isinstance(u_copy["_id"], str) and u_copy["_id"].startswith("usr_"):
+                    del u_copy["_id"]
+                await db.users.insert_one(u_copy)
+            logger.info("Seeded initial users into MongoDB Atlas 'users' collection.")
     except Exception as e:
         is_mongo_connected = False
-        logger.info(f"MongoDB not reachable at {MONGO_URI} ({e}). Using resilient in-memory storage for user sessions.")
+        logger.info(f"MongoDB Atlas connection notice ({e}). Using resilient in-memory session store.")
 
 async def close_db():
     global client

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import AlertBanner from '../../components/AlertBanner';
 import KpiCard from '../../components/KpiCard';
-import IndiaMap from '../../components/IndiaMap';
 import PollutionTrendChart from '../../components/PollutionTrendChart';
 import AqiDonutChart from '../../components/AqiDonutChart';
 import HealthImpactCards from '../../components/HealthImpactCards';
@@ -101,9 +100,6 @@ export default function OverviewPage() {
           sparklineData={[11200000, 11800000, 12200000, 12600000, 12900000, kpis.total_respiratory]}
         />
       </div>
-
-      {/* Interactive India Map */}
-      <IndiaMap />
 
       {/* Main Charts & Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

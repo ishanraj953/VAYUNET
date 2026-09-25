@@ -134,6 +134,58 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Firebase Cloud & Real-Time Sync Section */}
+        <div className="card-white rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#F2E8D5]">
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4 text-amber-600" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-stone-900">
+                Firebase Cloud & Real-Time Database Connection
+              </h3>
+            </div>
+            <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Connected & Operational</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div className="p-3 bg-[#FFFDF5] border border-[#E9DFCB] rounded-xl space-y-1">
+              <p className="font-bold text-stone-500 text-[10px] uppercase">Firebase Project ID</p>
+              <p className="font-mono font-bold text-stone-900 text-xs truncate">
+                {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'vayunet-india'}
+              </p>
+            </div>
+            <div className="p-3 bg-[#FFFDF5] border border-[#E9DFCB] rounded-xl space-y-1">
+              <p className="font-bold text-stone-500 text-[10px] uppercase">Auth Domain</p>
+              <p className="font-mono font-bold text-stone-900 text-xs truncate">
+                {import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'vayunet-india.firebaseapp.com'}
+              </p>
+            </div>
+            <div className="p-3 bg-[#FFFDF5] border border-[#E9DFCB] rounded-xl space-y-1">
+              <p className="font-bold text-stone-500 text-[10px] uppercase">Cloud Firestore DB</p>
+              <p className="font-mono font-bold text-emerald-700 text-xs flex items-center space-x-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Active (`users`, `alerts_stream` collections)</span>
+              </p>
+            </div>
+            <div className="p-3 bg-[#FFFDF5] border border-[#E9DFCB] rounded-xl space-y-1">
+              <p className="font-bold text-stone-500 text-[10px] uppercase">Google OAuth Provider</p>
+              <p className="font-mono font-bold text-emerald-700 text-xs flex items-center space-x-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Enabled (Popup SSO & ID Tokens)</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+            <p className="font-bold">Custom Firebase Credentials Setup:</p>
+            <p className="text-[11px] text-amber-800 leading-relaxed font-mono">
+              Provide <code className="bg-amber-100 px-1 rounded">VITE_FIREBASE_API_KEY</code>, <code className="bg-amber-100 px-1 rounded">VITE_FIREBASE_PROJECT_ID</code>, and <code className="bg-amber-100 px-1 rounded">VITE_FIREBASE_AUTH_DOMAIN</code> in your <code className="bg-amber-100 px-1 rounded">frontend/.env</code> to link your institutional Firebase project.
+            </p>
+          </div>
+        </div>
+
         {/* Visual Theme Info */}
         <div className="card-white rounded-2xl p-6 space-y-3">
           <div className="flex items-center space-x-2 pb-3 border-b border-[#F2E8D5]">

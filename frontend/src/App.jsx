@@ -28,6 +28,7 @@ import AiRiskPredictorPage from './pages/app/AiRiskPredictorPage';
 import ModelPerformancePage from './pages/app/ModelPerformancePage';
 import ExplainabilityPage from './pages/app/ExplainabilityPage';
 import EarlyWarningGridPage from './pages/app/EarlyWarningGridPage';
+import LiveEarlyWarningCommandPage from './pages/app/LiveEarlyWarningCommandPage';
 import DataQualityAuditPage from './pages/app/DataQualityAuditPage';
 import NcapPolicyTrackerPage from './pages/app/NcapPolicyTrackerPage';
 import ExecutiveBriefingPage from './pages/app/ExecutiveBriefingPage';
@@ -51,10 +52,17 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
 
-            {/* Redirect legacy aliases */}
+            {/* Redirect legacy aliases and direct URLs */}
             <Route path="/dashboard" element={<Navigate to="/app/overview" replace />} />
+            <Route path="/overview" element={<Navigate to="/app/overview" replace />} />
             <Route path="/map" element={<Navigate to="/app/map" replace />} />
+            <Route path="/gis-map" element={<Navigate to="/app/map" replace />} />
             <Route path="/predictor" element={<Navigate to="/app/ai-predictor" replace />} />
+            <Route path="/early-warning" element={<Navigate to="/app/live-early-warning" replace />} />
+            <Route path="/live-early-warning" element={<Navigate to="/app/live-early-warning" replace />} />
+            <Route path="/alerts" element={<Navigate to="/app/live-early-warning" replace />} />
+            <Route path="/live-alerts" element={<Navigate to="/app/live-early-warning" replace />} />
+            <Route path="/warning" element={<Navigate to="/app/live-early-warning" replace />} />
 
             {/* Authenticated Dashboard Shell */}
             <Route
@@ -78,6 +86,7 @@ export default function App() {
               <Route path="model-performance" element={<ModelPerformancePage />} />
               <Route path="explainability" element={<ExplainabilityPage />} />
               <Route path="early-warning" element={<EarlyWarningGridPage />} />
+              <Route path="live-early-warning" element={<LiveEarlyWarningCommandPage />} />
               <Route path="data-quality" element={<DataQualityAuditPage />} />
               <Route path="ncap-tracker" element={<NcapPolicyTrackerPage />} />
               <Route path="executive-briefing" element={<ExecutiveBriefingPage />} />

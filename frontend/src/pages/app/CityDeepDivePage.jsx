@@ -31,33 +31,61 @@ import { useFilters } from '../../context/FilterContext';
 import api from '../../api/axios';
 
 export default function CityDeepDivePage() {
-  const { metadata, filters } = useFilters();
-  const [selectedCity, setSelectedCity] = useState(filters.city !== 'All' ? filters.city : 'Delhi');
+  const { metadata, filters, updateFilter } = useFilters();
+  
+  // Resolve cities for the currently selected state
+  const stateCities = (filters.state !== 'All' && metadata.state_cities[filters.state])
+    ? metadata.state_cities[filters.state]
+    : (metadata.cities?.filter(c => c !== 'All') || ['CityA', 'CityB', 'CityC', 'CityD', 'CityE']);
+
+  const [selectedCity, setSelectedCity] = useState(
+    filters.city !== 'All' && stateCities.includes(filters.city)
+      ? filters.city
+      : (stateCities[0] || 'CityA')
+  );
   const [cityData, setCityData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Synchronize when state or city changes in global filters
   useEffect(() => {
-    fetchCityDetail(selectedCity);
-  }, [selectedCity]);
+    let targetCity = selectedCity;
+    if (filters.city !== 'All' && stateCities.includes(filters.city)) {
+      targetCity = filters.city;
+    } else if (!stateCities.includes(selectedCity)) {
+      targetCity = stateCities[0] || 'CityA';
+    }
+    setSelectedCity(targetCity);
+    fetchCityDetail(targetCity, filters.state);
+  }, [filters.state, filters.city]);
 
-  const fetchCityDetail = async (cityName) => {
+  const fetchCityDetail = async (cityName, stateName) => {
     setLoading(true);
     try {
-      const res = await api.get(`/pollution/cities/${encodeURIComponent(cityName)}`);
+      const activeState = stateName || filters.state;
+      const stateParam = (activeState && activeState !== 'All') ? `?state=${encodeURIComponent(activeState)}` : '';
+      const res = await api.get(`/pollution/cities/${encodeURIComponent(cityName)}${stateParam}`);
       setCityData(res.data);
     } catch (e) {
-      console.error(e);
+      console.error('Error fetching city details:', e);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCityChange = (newCity) => {
+    setSelectedCity(newCity);
+    updateFilter('city', newCity);
+    fetchCityDetail(newCity, filters.state);
+  };
+
+  const activeStateName = cityData?.state || (filters.state !== 'All' ? filters.state : 'State Node');
+
   // City vs State Benchmark Data
   const benchmarkData = cityData ? [
-    { metric: 'AQI Index', City: cityData.aqi, StateBaseline: Math.round(cityData.aqi * 0.88) },
-    { metric: 'PM 2.5 (µg/m³)', City: cityData.pm25, StateBaseline: Math.round(cityData.pm25 * 0.84) },
-    { metric: 'PM 10 (µg/m³)', City: cityData.pm10, StateBaseline: Math.round(cityData.pm10 * 0.86) },
-    { metric: 'NO2 (µg/m³)', City: cityData.no2, StateBaseline: Math.round(cityData.no2 * 0.90) },
+    { metric: 'AQI Index', City: cityData.aqi, StateBaseline: Math.round(cityData.aqi * 0.92) },
+    { metric: 'PM 2.5 (µg/m³)', City: cityData.pm25, StateBaseline: Math.round(cityData.pm25 * 0.88) },
+    { metric: 'PM 10 (µg/m³)', City: cityData.pm10, StateBaseline: Math.round(cityData.pm10 * 0.90) },
+    { metric: 'NO2 (µg/m³)', City: cityData.no2, StateBaseline: Math.round(cityData.no2 * 0.92) },
   ] : [];
 
   // Scatter data: PM2.5 vs Respiratory Cases
@@ -78,25 +106,31 @@ export default function CityDeepDivePage() {
           </div>
           <div>
             <h2 className="text-lg font-black text-stone-900 uppercase tracking-tight flex items-center space-x-2">
-              <span>{selectedCity} Urban Air Quality Dossier</span>
-              <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                {cityData?.state || 'State Node'}
+              <span>{filters.state !== 'All' ? `${filters.state} (${selectedCity})` : selectedCity} Urban Air Quality Dossier</span>
+              <span className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase">
+                {activeStateName}
               </span>
             </h2>
-            <p className="text-xs text-stone-500">Micro-climate diagnostics, particulate density & localized health burden</p>
+            <p className="text-xs text-stone-500">
+              Micro-climate diagnostics, particulate density & localized health burden for {filters.state !== 'All' ? `${filters.state} - ${selectedCity}` : selectedCity}
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#FFFDF5] border border-[#E9DFCB] rounded-xl px-3 py-2">
+        <div className="flex items-center space-x-2 bg-[#FFFDF5] border border-[#E9DFCB] rounded-xl px-3 py-2 shadow-xs">
           <MapPin className="w-4 h-4 text-amber-600" />
-          <span className="text-xs font-medium text-stone-600">Select City:</span>
+          <span className="text-xs font-medium text-stone-600">
+            {filters.state !== 'All' ? `${filters.state} Station:` : 'Select City:'}
+          </span>
           <select
             value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
+            onChange={(e) => handleCityChange(e.target.value)}
             className="bg-transparent text-xs font-bold text-stone-900 focus:outline-none cursor-pointer"
           >
-            {metadata.cities?.filter(c => c !== 'All').map(c => (
-              <option key={c} value={c}>{c}</option>
+            {stateCities.map(c => (
+              <option key={c} value={c}>
+                {filters.state !== 'All' ? `${filters.state} - ${c}` : c}
+              </option>
             ))}
           </select>
         </div>
@@ -111,7 +145,7 @@ export default function CityDeepDivePage() {
           {/* Main KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard
-              title="City Average AQI"
+              title={`${selectedCity} Average AQI`}
               value={cityData.aqi}
               unit="AQI"
               subtitle={cityData.aqi > 200 ? "Severe Health Hazard" : "Moderate Risk"}
@@ -140,7 +174,7 @@ export default function CityDeepDivePage() {
               title="Hospital Admissions"
               value={cityData.total_admissions}
               unit="Patients"
-              subtitle="Attributed acute surges"
+              subtitle={`Attributed to ${activeStateName} ${selectedCity}`}
               icon={Hospital}
               color="red"
             />
@@ -150,7 +184,7 @@ export default function CityDeepDivePage() {
           <div className="card-white rounded-2xl p-5">
             <h3 className="text-sm font-black text-stone-900 uppercase tracking-wider mb-2 flex items-center space-x-2">
               <TrendingUp className="w-4 h-4 text-amber-600" />
-              <span>Historical Chronological Telemetry for {selectedCity}</span>
+              <span>Historical Chronological Telemetry for {activeStateName} - {selectedCity}</span>
             </h3>
             <p className="text-xs text-stone-500 mb-4">Daily particulate readings over recent observation window</p>
 
@@ -168,15 +202,15 @@ export default function CityDeepDivePage() {
             </div>
           </div>
 
-          {/* Previous Streamlit Parity Row: Benchmark Bar & Health Scatter */}
+          {/* Benchmark Bar & Health Scatter */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* City vs State Benchmark Bar */}
             <div className="card-white rounded-2xl p-5 space-y-3">
               <h3 className="text-sm font-black text-stone-900 uppercase tracking-wider flex items-center space-x-2">
                 <BarChart2 className="w-4 h-4 text-amber-600" />
-                <span>{selectedCity} vs State Benchmark</span>
+                <span>{selectedCity} vs {activeStateName} Statewide Benchmark</span>
               </h3>
-              <p className="text-xs text-stone-500">Comparison of urban metrics against broader state average</p>
+              <p className="text-xs text-stone-500">Comparison of local urban readings against broader {activeStateName} averages</p>
 
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -186,8 +220,8 @@ export default function CityDeepDivePage() {
                     <YAxis stroke="#A8A29E" tick={{ fill: '#78716C', fontSize: 10 }} />
                     <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#EAE0CA', borderRadius: '12px', fontSize: '12px' }} />
                     <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
-                    <Bar dataKey="City" fill="#D97706" radius={[6, 6, 0, 0]} name={`${selectedCity}`} />
-                    <Bar dataKey="StateBaseline" fill="#9CA3AF" radius={[6, 6, 0, 0]} name={`${cityData.state} Baseline`} />
+                    <Bar dataKey="City" fill="#D97706" radius={[6, 6, 0, 0]} name={`${activeStateName} (${selectedCity})`} />
+                    <Bar dataKey="StateBaseline" fill="#9CA3AF" radius={[6, 6, 0, 0]} name={`${activeStateName} Baseline`} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -199,7 +233,7 @@ export default function CityDeepDivePage() {
                 <ScatterIcon className="w-4 h-4 text-red-600" />
                 <span>PM 2.5 vs Health Impact Correlation</span>
               </h3>
-              <p className="text-xs text-stone-500">Fine particulate exposure vs daily respiratory caseload in {selectedCity}</p>
+              <p className="text-xs text-stone-500">Fine particulate exposure vs daily respiratory caseload in {activeStateName} ({selectedCity})</p>
 
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -224,7 +258,7 @@ export default function CityDeepDivePage() {
             {/* Chemical Gas Metrics */}
             <div className="card-white rounded-2xl p-5 space-y-3">
               <h3 className="text-sm font-black text-stone-900 uppercase tracking-wider">
-                Multi-Gas Diagnostic Load
+                Multi-Gas Diagnostic Load ({activeStateName} - {selectedCity})
               </h3>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="p-3 bg-[#FFFDF5] border border-[#F2E8D5] rounded-xl">
@@ -250,7 +284,7 @@ export default function CityDeepDivePage() {
             <div className="card-white rounded-2xl p-5 space-y-3">
               <h3 className="text-sm font-black text-stone-900 uppercase tracking-wider flex items-center space-x-2">
                 <PieIcon className="w-4 h-4 text-amber-600" />
-                <span>Primary Urban Emission Contributors</span>
+                <span>Primary Emission Contributors in {activeStateName}</span>
               </h3>
               <div className="space-y-2.5">
                 {cityData.major_sources?.map((s) => (

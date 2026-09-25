@@ -6,10 +6,21 @@ from backend.services.data_service import (
     get_map_states_data,
     get_city_analytics,
     filter_dataframe,
-    load_dataset
+    load_dataset,
+    get_state_comparison
 )
+from backend.services.gis_service import get_live_gis_telemetry
 
 router = APIRouter(prefix="/api/pollution", tags=["Pollution Intelligence"])
+
+@router.get("/compare")
+def compare_states_endpoint(
+    stateA: Optional[str] = "Delhi",
+    stateB: Optional[str] = "Maharashtra",
+    metric: Optional[str] = "AQI",
+    time_range: Optional[str] = "30d"
+):
+    return get_state_comparison(stateA=stateA, stateB=stateB, metric=metric, time_range=time_range)
 
 @router.get("/meta")
 def meta_endpoint():
@@ -27,6 +38,30 @@ def national_endpoint(
 @router.get("/states")
 def states_endpoint(metric: Optional[str] = "AQI"):
     return get_map_states_data(metric=metric)
+
+from backend.services.live_api_service import fetch_live_coordinates_telemetry
+
+@router.get("/gis/live-stations")
+def gis_live_stations_endpoint(
+    state: Optional[str] = "All",
+    city: Optional[str] = "All",
+    metric: Optional[str] = "AQI",
+    live_feed: Optional[bool] = False
+):
+    """
+    Returns real-time geospatial telemetry for Pan-India CAAQMS monitoring stations across all 36 States and Union Territories.
+    """
+    return get_live_gis_telemetry(state_filter=state, city_filter=city, metric=metric, fetch_direct_live=bool(live_feed))
+
+@router.get("/live-coordinate")
+def live_coordinate_endpoint(lat: float = 28.6139, lng: float = 77.2090):
+    """
+    Directly queries real-time open satellite & station API over HTTP for any latitude & longitude in India.
+    """
+    res = fetch_live_coordinates_telemetry(lat, lng)
+    if res:
+        return res
+    return {"error": "Could not fetch live telemetry for coordinates", "lat": lat, "lng": lng}
 
 @router.get("/states/{state}")
 def single_state_endpoint(state: str):
@@ -70,5 +105,5 @@ def cities_list_endpoint():
     return cities
 
 @router.get("/cities/{city}")
-def single_city_endpoint(city: str):
-    return get_city_analytics(city)
+def single_city_endpoint(city: str, state: Optional[str] = Query(None)):
+    return get_city_analytics(city=city, state=state)

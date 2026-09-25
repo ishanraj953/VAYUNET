@@ -78,7 +78,9 @@ export default function AppNavbar({ alertCount = 14 }) {
             className="bg-transparent font-semibold text-stone-800 focus:outline-none cursor-pointer pr-1"
           >
             {metadata.availableCities?.map(ct => (
-              <option key={ct} value={ct}>{ct}</option>
+              <option key={ct} value={ct}>
+                {ct === 'All' ? 'All Cities' : (filters.state !== 'All' ? `${filters.state} - ${ct}` : ct)}
+              </option>
             ))}
           </select>
         </div>
@@ -136,11 +138,11 @@ export default function AppNavbar({ alertCount = 14 }) {
                 </div>
               </div>
               <Link
-                to="/app/early-warning"
+                to="/app/live-early-warning"
                 onClick={() => setNotifOpen(false)}
                 className="block text-center mt-3 pt-2 text-xs font-bold text-amber-700 hover:text-amber-800 border-t border-stone-100"
               >
-                View Full Alert Grid &rarr;
+                View Live Emergency Command &rarr;
               </Link>
             </div>
           )}
