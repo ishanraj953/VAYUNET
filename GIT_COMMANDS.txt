@@ -1,0 +1,90 @@
+# 🚀 GitHub Push Commands (Run in NEW PowerShell/CMD)
+
+**IMPORTANT:** Close your current PowerShell/Terminal window and open a NEW one. Git needs the terminal to restart.
+
+## Step 1: Configure Git (run once)
+```powershell
+git config --global user.name "Devendrapandey7642"
+git config --global user.email "dp6867565@gmail.com"
+```
+
+## Step 2: Navigate to project and initialize
+```powershell
+cd "c:\Users\dp686\Desktop\Air_Pollution_Health_Risk_Project"
+git init
+```
+
+## Step 3: Add all files and commit
+```powershell
+git add .
+git commit -m "Initial commit: Air Pollution Health Risk Dashboard"
+```
+
+## Step 4: Add remote and push to GitHub
+```powershell
+git remote add origin https://github.com/Devendrapandey7642/All-India-Air-Pollution-Health-Risk-Dashboard.git
+git branch -M main
+git push -u origin main
+```
+
+## Step 5: GitHub Authentication
+When prompted for password:
+- Use your **Personal Access Token** from: https://github.com/settings/tokens
+- NOT your GitHub password
+
+### Create a Personal Access Token:
+1. Go to: https://github.com/settings/tokens
+2. Click "Generate new token (classic)"
+3. Check boxes: `repo` (full control)
+4. Click "Generate token"
+5. **Copy the token** (it won't show again)
+6. When git asks for password, **paste this token**
+
+---
+
+## ✅ Success Indicators
+
+After `git push`:
+```
+Enumerating objects: XX, done.
+Counting objects: 100% (XX/XX), done.
+Delta compression using up to X threads
+Compressing objects: 100% (XX/XX), done.
+Writing objects: 100% (XX/XX), done.
+Total X (delta 0), reused 0 (delta 0), pack-reused 0
+remote: This repository moved. Updating the origin remote.
+To github.com:Devendrapandey7642/All-India-Air-Pollution-Health-Risk-Dashboard.git
+ * [new branch]      main -> main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+```
+
+---
+
+## 🐛 If "fatal: 'origin' does not appear to be a git repository"
+
+You might have skipped `git init`. Run these in order:
+```powershell
+git init
+git remote add origin https://github.com/Devendrapandey7642/All-India-Air-Pollution-Health-Risk-Dashboard.git
+git add .
+git commit -m "Initial commit"
+git push -u origin main
+```
+
+---
+
+## 📱 After GitHub Push
+
+Your repo is ready for Streamlit Cloud! Go to:
+1. https://streamlit.io/cloud
+2. Sign in with GitHub
+3. Click "New app"
+4. Select your repository
+5. Main file: `streamlit_app.py`
+6. Click "Deploy" ✅
+
+Your live app: **https://your-app-name.streamlit.app**
+
+---
+
+**Need help? Open NEW PowerShell and copy-paste the commands above! 💪**
