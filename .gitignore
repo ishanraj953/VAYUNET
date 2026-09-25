@@ -40,10 +40,6 @@ MANIFEST
 .vscode/
 *.code-workspace
 
-# Streamlit
-.streamlit/secrets.toml
-.streamlit/cache/
-
 # OS
 .DS_Store
 Thumbs.db
