@@ -122,8 +122,8 @@ VAYUNET strictly adheres to a **light, high-contrast, professional enterprise vi
 ### Step 1: Clone & Configure
 
 ```bash
-git clone https://github.com/Devendrapandey7642/All-India-Air-Pollution-Health-Risk-Dashboard.git
-cd All-India-Air-Pollution-Health-Risk-Dashboard
+git clone https://github.com/ishanraj953/VAYUNET
+cd VAYUNET
 ```
 
 Copy the environment template:
