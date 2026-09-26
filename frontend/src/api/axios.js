@@ -1,13 +1,14 @@
 import axios from 'axios';
 
-let rawBase = import.meta.env.VITE_API_URL || '/api';
-rawBase = rawBase.trim();
+let rawBase = (import.meta.env.VITE_API_URL || '/api').trim();
 
-// Normalize URL: ensure clean base and standard /api prefix if pointing to backend domain
-let API_BASE = rawBase;
-if (API_BASE.startsWith('http')) {
-  const clean = API_BASE.replace(/\/+$/, '');
+// Normalize URL: handle absolute URL or clean relative path
+let API_BASE = '/api';
+if (rawBase.startsWith('http://') || rawBase.startsWith('https://')) {
+  const clean = rawBase.replace(/\/+$/, '');
   API_BASE = clean.endsWith('/api') ? clean : `${clean}/api`;
+} else if (rawBase) {
+  API_BASE = rawBase.startsWith('/') ? rawBase : `/${rawBase}`;
 }
 
 const api = axios.create({
