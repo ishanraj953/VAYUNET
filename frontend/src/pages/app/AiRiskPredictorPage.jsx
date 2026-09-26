@@ -163,10 +163,41 @@ export default function AiRiskPredictorPage() {
 
   const handleSliderChange = (field, val) => {
     const num = parseFloat(val);
-    setScenario(prev => ({
-      ...prev,
-      [field]: isNaN(num) ? 0 : num
-    }));
+    const validNum = isNaN(num) ? 0 : num;
+    
+    setScenario(prev => {
+      const updated = {
+        ...prev,
+        [field]: validNum
+      };
+
+      // Bidirectional sync: when PM2.5 or PM10 changes, auto-update composite AQI according to CPCB standard
+      if (field === 'PM2_5' || field === 'PM10' || field === 'NO2') {
+        const pm25 = field === 'PM2_5' ? validNum : prev.PM2_5;
+        let calcAqi = 50;
+        if (pm25 <= 30) calcAqi = Math.round((pm25 * 50) / 30);
+        else if (pm25 <= 60) calcAqi = Math.round(50 + ((pm25 - 30) * 50) / 30);
+        else if (pm25 <= 90) calcAqi = Math.round(100 + ((pm25 - 60) * 100) / 30);
+        else if (pm25 <= 120) calcAqi = Math.round(200 + ((pm25 - 90) * 100) / 30);
+        else if (pm25 <= 250) calcAqi = Math.round(300 + ((pm25 - 120) * 100) / 130);
+        else calcAqi = Math.min(500, Math.round(400 + ((pm25 - 250) * 100) / 150));
+        
+        updated.AQI = Math.max(10, Math.min(500, calcAqi));
+      } else if (field === 'AQI') {
+        // When AQI slider is dragged, scale PM2.5 & PM10 realistically
+        let approxPm25 = 20;
+        if (validNum <= 50) approxPm25 = Math.round((validNum * 30) / 50);
+        else if (validNum <= 100) approxPm25 = Math.round(30 + ((validNum - 50) * 30) / 50);
+        else if (validNum <= 200) approxPm25 = Math.round(60 + ((validNum - 100) * 30) / 100);
+        else if (validNum <= 300) approxPm25 = Math.round(90 + ((validNum - 200) * 30) / 100);
+        else approxPm25 = Math.round(120 + ((validNum - 300) * 130) / 100);
+        
+        updated.PM2_5 = approxPm25;
+        updated.PM10 = Math.round(approxPm25 * 1.5);
+      }
+
+      return updated;
+    });
   };
 
   const handleReset = () => {
