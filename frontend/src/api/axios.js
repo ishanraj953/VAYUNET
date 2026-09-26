@@ -1,14 +1,21 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+let rawBase = import.meta.env.VITE_API_URL || '/api';
+rawBase = rawBase.trim();
+
+// Normalize URL: ensure clean base and standard /api prefix if pointing to backend domain
+let API_BASE = rawBase;
+if (API_BASE.startsWith('http')) {
+  const clean = API_BASE.replace(/\/+$/, '');
+  API_BASE = clean.endsWith('/api') ? clean : `${clean}/api`;
+}
 
 const api = axios.create({
-  baseURL: API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE,
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
 
 // Request interceptor to attach JWT token
 api.interceptors.request.use((config) => {

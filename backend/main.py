@@ -50,14 +50,16 @@ async def startup_event():
 async def shutdown_event():
     await close_db()
 
-# Mount all feature routers
+# Mount all feature routers under standard /api prefix
 app.include_router(auth.router)
 app.include_router(pollution.router)
 app.include_router(analytics.router)
 app.include_router(prediction.router)
 app.include_router(governance.router)
 
+# Health endpoint (available at both /api/health and /health)
 @app.get("/api/health")
+@app.get("/health")
 def health_status():
     return {
         "status": "online",
