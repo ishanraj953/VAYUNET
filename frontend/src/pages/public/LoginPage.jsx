@@ -7,6 +7,7 @@ import {
   EyeOff, 
   AlertCircle, 
   ArrowRight, 
+  ArrowLeft,
   ShieldCheck, 
   Activity, 
   Lock, 
@@ -152,8 +153,19 @@ export default function LoginPage() {
 
         {/* Right Side: Professional Enterprise Form (7 cols) */}
         <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
-          <div className="max-w-md w-full mx-auto space-y-5">
+          <div className="max-w-md w-full mx-auto space-y-4">
             
+            {/* Back Button */}
+            <div>
+              <Link 
+                to="/" 
+                className="inline-flex items-center space-x-2 text-xs font-bold text-stone-500 hover:text-stone-900 transition-colors group px-2.5 py-1 rounded-lg hover:bg-stone-100 w-fit"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1 text-amber-600" />
+                <span>Back to Overview</span>
+              </Link>
+            </div>
+
             {/* Title & Status */}
             <div>
               <div className="flex items-center justify-between">

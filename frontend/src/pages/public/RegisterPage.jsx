@@ -6,6 +6,7 @@ import {
   EyeOff, 
   AlertCircle, 
   ArrowRight,
+  ArrowLeft,
   ShieldCheck,
   Database
 } from 'lucide-react';
@@ -69,6 +70,17 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-[#FFFDF5] flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="max-w-md w-full card-white rounded-3xl p-8 sm:p-10 shadow-2xl space-y-5 border border-[#EAE0CA] bg-white">
+        {/* Back Button */}
+        <div>
+          <Link 
+            to="/" 
+            className="inline-flex items-center space-x-2 text-xs font-bold text-stone-500 hover:text-stone-900 transition-colors group px-2.5 py-1 rounded-lg hover:bg-stone-100 w-fit"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1 text-amber-600" />
+            <span>Back to Overview</span>
+          </Link>
+        </div>
+
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center space-x-2.5 justify-center">
